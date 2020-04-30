@@ -6,14 +6,32 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Lab.Models
 {
-    public class shopContext : DbContext
+    public class mainContext : DbContext
     {
-        public shopContext(DbContextOptions<shopContext> options)
+        public mainContext(DbContextOptions<mainContext> options)
             : base(options)
         {
         }
 
+        public DbSet<good> Goods { get; set; }
         public DbSet<shop> Shops { get; set; }
+
+
+        public IEnumerable<good> getCheapGoods(IEnumerable<good> goods)
+        {
+            return
+                from good in goods
+                where good.Price < 1000
+                select good;
+        }
+
+        public IEnumerable<string>getMyGood(string name, IEnumerable<shop> Shops1)
+        {
+            var Shops = Shops1.ToList();
+
+            return
+                Shops.Where(s => s.Goods.FirstOrDefault(g => g.Name == name) != null).Select(sh => sh.Name);
+        }
 
         public IEnumerable<shop> getBigShops(IEnumerable<shop> shops)
         {
@@ -25,7 +43,7 @@ namespace Lab.Models
             var goods = Shop.Goods;
             foreach (var i in goods)
             {
-                i.Price *= Convert.ToSingle(Shop.Sale()/100.0);
+                i.Price *= Convert.ToSingle(Shop.Sale() / 100.0);
             }
 
             return goods;

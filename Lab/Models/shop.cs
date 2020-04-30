@@ -11,7 +11,7 @@ namespace Lab.Models
         public string Name { get; set; }
         public ICollection<good> Goods { get; set; }
 
-        public int Sale()
+        public float Sale()
         {
             Random rnd = new Random();
             return rnd.Next(99);

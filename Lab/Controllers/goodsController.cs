@@ -6,16 +6,17 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Lab.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Lab.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/goods")]
     [ApiController]
     public class goodsController : ControllerBase
     {
-        private readonly goodContext _context;
+        private readonly mainContext _context;
 
-        public goodsController(goodContext context)
+        public goodsController(mainContext context)
         {
             _context = context;
         }
@@ -39,6 +40,21 @@ namespace Lab.Controllers
             }
 
             return good;
+        }
+
+        [HttpGet("Cheap")]
+        [Authorize]
+        public IEnumerable<good> GetCheapGoods()
+        {
+            return _context.getCheapGoods(_context.Goods);
+            
+        }
+
+        [HttpGet("Find/{good}")]
+        public IEnumerable<string> GetMyGood(string good)
+        {
+            return _context.getMyGood(good, _context.Shops);
+            
         }
 
         // PUT: api/goods/5
@@ -77,6 +93,7 @@ namespace Lab.Controllers
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for
         // more details see https://aka.ms/RazorPagesCRUD.
         [HttpPost]
+        [Authorize(Roles = "admin")]
         public async Task<ActionResult<good>> Postgood(good good)
         {
             _context.Goods.Add(good);

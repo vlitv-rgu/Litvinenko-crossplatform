@@ -6,16 +6,17 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Lab.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Lab.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/shops")]
     [ApiController]
     public class shopsController : ControllerBase
     {
-        private readonly shopContext _context;
+        private readonly mainContext _context;
 
-        public shopsController(shopContext context)
+        public shopsController(mainContext context)
         {
             _context = context;
         }
@@ -29,20 +30,7 @@ namespace Lab.Controllers
 
         // GET: api/shops/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<int>> Getshop(long id)
-        {
-            var shop = await _context.Shops.FindAsync(id);
-
-            if (shop == null)
-            {
-                return NotFound();
-            }
-
-            return shop.Sale();
-        }
-
-        [HttpGet("{id}")]
-        public async Task<ActionResult<shop>> GetSale(long id)
+        public async Task<ActionResult<shop>> Getshop(long id)
         {
             var shop = await _context.Shops.FindAsync(id);
 
@@ -52,6 +40,27 @@ namespace Lab.Controllers
             }
 
             return shop;
+        }
+
+        [HttpGet("{id}/Sale")]
+        [Authorize]
+        public ICollection<good> GetSale(long id)
+        {
+            var shop = _context.Shops.Find(id);
+
+            if (shop == null)
+            {
+                return null;
+            }
+            return _context.GetSale(shop);
+        }
+
+        [HttpGet("Bigs")]
+        [Authorize]
+        public IEnumerable<shop> GetBigShops()
+        {
+            return _context.getBigShops(_context.Shops);
+
         }
 
         // PUT: api/shops/5
@@ -90,17 +99,18 @@ namespace Lab.Controllers
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for
         // more details see https://aka.ms/RazorPagesCRUD.
         [HttpPost]
+        [Authorize(Roles = "admin")]
         public async Task<ActionResult<shop>> Postshop(shop shop)
         {
             _context.Shops.Add(shop);
             await _context.SaveChangesAsync();
 
-            //return CreatedAtAction("Getshop", new { id = shop.Id }, shop);
-            return CreatedAtAction(nameof(Getshop), new { id = shop.Id }, shop);
+            return CreatedAtAction("Getshop", new { id = shop.Id }, shop);
         }
 
         // DELETE: api/shops/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "admin")]
         public async Task<ActionResult<shop>> Deleteshop(long id)
         {
             var shop = await _context.Shops.FindAsync(id);
