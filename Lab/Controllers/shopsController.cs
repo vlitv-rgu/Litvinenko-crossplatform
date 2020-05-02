@@ -55,11 +55,11 @@ namespace Lab.Controllers
             return _context.GetSale(shop);
         }
 
-        [HttpGet("Bigs")]
+        [HttpGet("Bigs/{h}")]
         [Authorize]
-        public IEnumerable<shop> GetBigShops()
+        public IEnumerable<shop> GetBigShops(int h)
         {
-            return _context.getBigShops(_context.Shops);
+            return _context.getBigShops(h);
 
         }
 

@@ -23,37 +23,29 @@ namespace Lab.Controllers
 
         // GET: api/goods
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<good>>> GetGoods()
+        public IEnumerable<good> GetGoods()
         {
-            return await _context.Goods.ToListAsync();
+            return _context.getAllGoods().ToList();
         }
 
         // GET: api/goods/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<good>> Getgood(long id)
+        public good Getgood(long id)
         {
-            var good = await _context.Goods.FindAsync(id);
-
-            if (good == null)
-            {
-                return NotFound();
-            }
-
-            return good;
+            return _context.getGood(id);
         }
 
         [HttpGet("Cheap")]
         [Authorize]
         public IEnumerable<good> GetCheapGoods()
         {
-            return _context.getCheapGoods(_context.Goods);
-            
+            return _context.getCheapGoods();
         }
 
-        [HttpGet("Find/{good}")]
-        public IEnumerable<string> GetMyGood(string good)
+        [HttpGet("Find/{goodName}")]
+        public IEnumerable<string> GetMyGood(string goodName)
         {
-            return _context.getMyGood(good, _context.Shops);
+            return _context.getGoodsShop(goodName);
             
         }
 
@@ -92,11 +84,16 @@ namespace Lab.Controllers
         // POST: api/goods
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for
         // more details see https://aka.ms/RazorPagesCRUD.
-        [HttpPost]
+        [HttpPost("toShop/{id}")]
         [Authorize(Roles = "admin")]
-        public async Task<ActionResult<good>> Postgood(good good)
+        public async Task<ActionResult<good>> Postgood(good good, long id)
         {
-            _context.Goods.Add(good);
+            var Shop = await _context.Shops.FindAsync(id);
+
+            if (Shop == null)
+                return BadRequest();
+
+            Shop.Goods.Add(good);
             await _context.SaveChangesAsync();
 
             //return CreatedAtAction("Getgood", new { id = good.Id }, good);
@@ -105,15 +102,16 @@ namespace Lab.Controllers
 
         // DELETE: api/goods/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "admin")]
         public async Task<ActionResult<good>> Deletegood(long id)
         {
-            var good = await _context.Goods.FindAsync(id);
+            var good = _context.getGood(id);
             if (good == null)
             {
                 return NotFound();
             }
 
-            _context.Goods.Remove(good);
+            _context.Shops.Where(s => s.Goods.FirstOrDefault(g => g.Id == id) != null).FirstOrDefault().Goods.Remove(good);
             await _context.SaveChangesAsync();
 
             return good;
@@ -121,7 +119,7 @@ namespace Lab.Controllers
 
         private bool goodExists(long id)
         {
-            return _context.Goods.Any(e => e.Id == id);
+            return _context.getAllGoods().Any(e => e.Id == id);
         }
     }
 }

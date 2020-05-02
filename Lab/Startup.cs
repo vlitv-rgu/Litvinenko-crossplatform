@@ -32,7 +32,7 @@ namespace Lab
         {
             services.AddDbContext<mainContext>(opt =>
                opt.UseInMemoryDatabase("goodList"));
-            services.AddDbContext<shopContext>(opt =>
+            services.AddDbContext<mainContext>(opt =>
                opt.UseInMemoryDatabase("shopList"));
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>

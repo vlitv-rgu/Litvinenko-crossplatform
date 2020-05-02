@@ -11,6 +11,11 @@ namespace Lab.Models
         public string Name { get; set; }
         public ICollection<good> Goods { get; set; }
 
+        public shop()
+        {
+            Goods = new List<good>();
+        }
+
         public float Sale()
         {
             Random rnd = new Random();

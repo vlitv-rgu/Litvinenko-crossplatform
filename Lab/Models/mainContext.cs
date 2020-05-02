@@ -13,29 +13,48 @@ namespace Lab.Models
         {
         }
 
-        public DbSet<good> Goods { get; set; }
+      //  public DbSet<good> Goods { get; set; }
         public DbSet<shop> Shops { get; set; }
 
 
-        public IEnumerable<good> getCheapGoods(IEnumerable<good> goods)
+        public IEnumerable<good> getAllGoods()
         {
+            var res = new List<good>();
+            foreach (var i in Shops.ToList())
+            {
+                res.AddRange(i.Goods);
+            }
+            return res;
+        }
+
+        public good getGood(long id)
+        {
+            foreach (var i in Shops.ToList())
+            {
+                var res = i.Goods.FirstOrDefault(g => g.Id == id);
+                if (res != null)
+                    return res;
+            }
+            return null;
+        }
+
+        public IEnumerable<good> getCheapGoods()
+        {
+            var goods = getAllGoods();
             return
                 from good in goods
                 where good.Price < 1000
                 select good;
         }
 
-        public IEnumerable<string>getMyGood(string name, IEnumerable<shop> Shops1)
+        public IEnumerable<string>getGoodsShop(string name)
         {
-            var Shops = Shops1.ToList();
-
-            return
-                Shops.Where(s => s.Goods.FirstOrDefault(g => g.Name == name) != null).Select(sh => sh.Name);
+            return Shops.Where(s => s.Goods.FirstOrDefault(g => g.Name == name) != null).Select(sh => sh.Name);
         }
 
-        public IEnumerable<shop> getBigShops(IEnumerable<shop> shops)
+        public IEnumerable<shop> getBigShops(int h)
         {
-            return shops.Where(p => p.Goods.Count > 5);
+            return Shops.Where(p => p.Goods.Count > h);
         }
 
         public ICollection<good> GetSale(shop Shop)
