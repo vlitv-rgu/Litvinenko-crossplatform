@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Lab.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore.Internal;
 
 namespace Lab.Controllers
 {
@@ -52,32 +53,20 @@ namespace Lab.Controllers
         // PUT: api/goods/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for
         // more details see https://aka.ms/RazorPagesCRUD.
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Putgood(long id, good good)
+        [HttpPut("{idS}/{idG}")]
+        public async Task<IActionResult> Putgood(long idS, long idG, good good)
         {
-            if (id != good.Id)
-            {
+            var Shop = await _context.Shops.FindAsync(idS);
+
+            if (Shop == null)
                 return BadRequest();
-            }
 
-            _context.Entry(good).State = EntityState.Modified;
+            var currentGood = Shop.Goods.FirstOrDefault(g => g.Id == idG);
+            int index = Shop.Goods.IndexOf(currentGood);
+            Shop.Goods.Remove(currentGood);
+            Shop.Goods.Insert(index, good);
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!goodExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
+            await _context.SaveChangesAsync();
             return NoContent();
         }
 
@@ -111,7 +100,7 @@ namespace Lab.Controllers
                 return NotFound();
             }
 
-            _context.Shops.Where(s => s.Goods.FirstOrDefault(g => g.Id == id) != null).FirstOrDefault().Goods.Remove(good);
+            _context.Shops.FirstOrDefault(s => s.Goods.FirstOrDefault(g => g.Id == id) != null).Goods.Remove(good);
             await _context.SaveChangesAsync();
 
             return good;

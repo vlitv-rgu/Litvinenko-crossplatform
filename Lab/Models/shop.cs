@@ -9,7 +9,7 @@ namespace Lab.Models
     { 
         public long Id { get; set; }
         public string Name { get; set; }
-        public ICollection<good> Goods { get; set; }
+        public List<good> Goods { get; set; }
 
         public shop()
         {
